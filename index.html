@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabungan Harian</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #e8f5e9;
+    }
+
+    .container {
+      text-align: center;
+      background: #ffffff;
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 450px;
+      margin: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .time {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    .saldo {
+      font-size: 22px;
+      font-weight: bold;
+      color: #388e3c;
+      margin-bottom: 15px;
+    }
+
+    .timer {
+      font-size: 18px;
+      color: #d32f2f;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #388e3c;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #2c6f29;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      background-color: #1b4d1f;
+      transform: translateY(2px);
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    .footer-note {
+      color: #666;
+    }
+    
+    .countdown-container {
+      background: #f3f4f6;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    table {
+      width: 100%;
+      margin: 20px 0;
+      border-collapse: collapse;
+      background-color: #f9f9f9;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #388e3c;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tabungan Harian</h1>
+    <div class="time" id="current-time">Waktu: --:--:--</div>
+    <div id="current-date" class="time">Tanggal: --</div>
+    <div class="saldo">Saldo Tabungan: <span id="saldo">0</span> IDR</div>
+    
+    <div class="countdown-container">
+      <div class="timer">Hitung Mundur: <span id="countdown">--</span> Hari</div>
+    </div>
+    
+    <table>
+      <tr>
+        <th>Keterangan</th>
+        <th>Biaya (IDR)</th>
+      </tr>
+      <tr>
+        <td>Perjalanan dari Madura ke Surabaya</td>
+        <td>50.000</td>
+      </tr>
+      <tr>
+        <td>Perjalanan Surabaya ke Jakarta (Kereta)</td>
+        <td>500.000</td>
+      </tr>
+      <tr>
+        <td>Perjalanan Jakarta ke Padang (Bus)</td>
+        <td>1.000.000</td>
+      </tr>
+      <tr>
+        <td>Sewa Kos di Padang (5 hari)</td>
+        <td>250.000</td>
+      </tr>
+      <tr>
+        <td>Makan di Padang (5 hari)</td>
+        <td>100.000</td>
+      </tr>
+      <tr>
+        <td>Perjalanan Padang ke Bandung (Bus)</td>
+        <td>1.200.000</td>
+      </tr>
+      <tr>
+        <th>Total Biaya</th>
+        <th>3.600.000</th>
+      </tr>
+    </table>
+
+    <button id="tambah-saldo">+ Tambah 20k</button>
+    <button id="toggle-notifications">Matikan Notifikasi</button>
+  </div>
+  
+  <footer>
+    <div class="footer-note">Web hanya aktif pada hari sekolah (Senin - Jumat).</div>
+    <h4 style="font-size: 20px; ">creat by daniel</h4>
+  </footer>
+
+  <script>
+    let saldo = 0;
+    let countdownInterval;
+    let notificationsEnabled = true;
+    const saldoDisplay = document.getElementById("saldo");
+    const tambahSaldoBtn = document.getElementById("tambah-saldo");
+    const toggleNotificationsBtn = document.getElementById("toggle-notifications");
+    const currentTimeDisplay = document.getElementById("current-time");
+    const currentDateDisplay = document.getElementById("current-date");
+    const countdownDisplay = document.getElementById("countdown");
+    let countdownEndTime;
+
+    // Tanggal kelulusan
+    const graduationDate = new Date(new Date().getFullYear(), 5, 30); // 30 Juni 2024
+
+    // Fungsi untuk memperbarui waktu di layar
+    function updateTime() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const seconds = now.getSeconds().toString().padStart(2, '0');
+      const date = now.toLocaleDateString();
+      currentTimeDisplay.textContent = `Waktu: ${hours}:${minutes}:${seconds}`;
+      currentDateDisplay.textContent = `Tanggal: ${date}`;
+    }
+
+    // Fungsi untuk menghitung mundur hanya pada hari Senin-Jumat
+    function startCountdown() {
+      let today = new Date();
+      let targetDate = new Date(today);
+      let schoolDays = 0; // Menghitung hari sekolah (Senin - Jumat)
+
+      // Mencari hari Senin besok jika hari ini Sabtu atau Minggu
+      while (targetDate.getDay() !== 1) {
+        targetDate.setDate(targetDate.getDate() + 1); // Pindah ke hari Senin
+      }
+
+      // Hitung mundur 107 hari sekolah (Senin - Jumat)
+      while (schoolDays < 107) {
+        targetDate.setDate(targetDate.getDate() + 1); // Pindah ke hari berikutnya
+        if (targetDate.getDay() !== 0 && targetDate.getDay() !== 6) {
+          schoolDays++; // Hanya hitung Senin-Jumat
+        }
+      }
+
+      countdownEndTime = targetDate;
+
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    // Fungsi untuk memperbarui hitung mundur
+    function updateCountdown() {
+      const now = new Date();
+      let remainingTime = countdownEndTime - now;
+
+      if (remainingTime <= 0) {
+        clearInterval(countdownInterval);
+        countdownDisplay.textContent = "Waktu Habis!";
+        return;
+      }
+
+      const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+      countdownDisplay.textContent = days + " Hari";
+    }
+
+    // Fungsi untuk menampilkan notifikasi
+    function showNotification() {
+      if (Notification.permission === "granted" && notificationsEnabled) {
+        new Notification("Waktunya Menabung!", {
+          body: "Ingat, setiap hari senin sampai jumat, sisihkan uangmu untuk menabung!",
+        });
+      }
+    }
+
+    // Fungsi untuk memeriksa waktu dan menampilkan notifikasi
+    function checkForReminder() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const dayOfWeek = now.getDay(); // 1 = Senin, 2 = Selasa, ..., 5 = Jumat
+
+      // Jika hari Senin-Jumat dan jam 8 pagi
+      if (dayOfWeek >= 1 && dayOfWeek <= 5 && hours === 8 && minutes === 0) {
+        showNotification();
+      }
+    }
+
+    // Meminta izin untuk menampilkan notifikasi (harus dilakukan sekali pada awalnya)
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    // Event listener untuk tombol tambah saldo
+    tambahSaldoBtn.addEventListener("click", function() {
+      saldo += 20000;
+      saldoDisplay.textContent = saldo;
+    });
+
+    // Event listener untuk toggle notifikasi
+    toggleNotificationsBtn.addEventListener("click", function() {
+      notificationsEnabled = !notificationsEnabled;
+      toggleNotificationsBtn.textContent = notificationsEnabled ? "Matikan Notifikasi" : "Nyalakan Notifikasi";
+    });
+
+    // Memulai pembaruan waktu dan countdown
+    updateTime();
+    setInterval(updateTime, 1000);
+    startCountdown();
+
+    // Cek notifikasi setiap menit
+    setInterval(checkForReminder, 60000);
+  </script>
+</body>
+</html>
